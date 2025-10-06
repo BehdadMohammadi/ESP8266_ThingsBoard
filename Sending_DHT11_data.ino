@@ -13,7 +13,7 @@ const char* ssid = "BEHDAD";
 const char* password = "behdad1234";
 
 // Your ThingsBoard access token
-const char* accessToken = "PfaLAKE9bTmmjx5srEfq";
+const char* accessToken = "****";
 
 // ThingsBoard server
 const char* server = "http://thingsboard.cloud";
