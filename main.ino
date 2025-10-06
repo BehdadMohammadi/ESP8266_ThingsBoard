@@ -1,0 +1,82 @@
+#include <ESP8266WiFi.h>
+#include <ESP8266HTTPClient.h>
+
+const char* ssid = "BEHDAD";
+const char* password = "behdad1234";
+
+// Your ThingsBoard access token
+const char* accessToken = "*****";
+
+// ThingsBoard server
+const char* server = "http://thingsboard.cloud";
+
+void setup() {
+
+  Serial.begin(115200);
+  delay(1000);
+
+  wifi_start();
+
+  
+}
+
+void wifi_start(){
+
+  WiFi.begin(ssid, password);
+  Serial.print("Connecting to WiFi");
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  delay(1000);
+  Serial.println("\nWiFi connected!");
+
+}
+
+
+void loop() {
+
+  if (WiFi.status() == WL_CONNECTED) {
+    
+    WiFiClient client;
+    HTTPClient http;
+
+    // Construct the full URL like in your curl command
+    String url = String(server) + "/api/v1/" + accessToken + "/telemetry";
+
+    http.begin(client, url);
+    http.addHeader("Content-Type", "application/json");
+
+    // JSON data to send
+    // String payload = "{\"temperature\":25}";
+    // String payload = "{\"temperature\":25, \"humidity\":60, \"pressure\":1013}";
+    
+    float temperature = 25.1;
+    float humidity = 60.2;
+    float pressure = 1013;
+
+    String payload = "{\"temperature\":" + String(temperature) + ", \"humidity\":" + String(humidity) + ", \"pressure\":" + String(pressure) + "}";
+
+
+    // Send POST request
+    int httpResponseCode = http.POST(payload);
+
+    // Print the result
+    Serial.print("HTTP Response code: ");
+    Serial.println(httpResponseCode);
+
+    http.end();
+  } 
+  else 
+  {
+    Serial.println("WiFi disconnected!");
+
+    Serial.println("Trying to reconnect to wifi!");
+
+    wifi_start();
+  }
+
+  delay(5000); // send data every 5 seconds
+}
