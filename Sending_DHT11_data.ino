@@ -6,7 +6,6 @@
 #define DHTTYPE DHT11   // DHT 11
 DHT dht(DHTPIN, DHTTYPE);
 
-
 float humidity;
 float temperature;
 
@@ -14,7 +13,7 @@ const char* ssid = "BEHDAD";
 const char* password = "behdad1234";
 
 // Your ThingsBoard access token
-const char* accessToken = "****";
+const char* accessToken = "PfaLAKE9bTmmjx5srEfq";
 
 // ThingsBoard server
 const char* server = "http://thingsboard.cloud";
@@ -27,6 +26,7 @@ void setup() {
   wifi_start();
 
   dht.begin();
+  delay(1000);
 
 }
 
@@ -45,6 +45,28 @@ void wifi_start(){
 
 }
 
+void dht11_get_data()
+{
+
+  humidity = dht.readHumidity();
+  temperature = dht.readTemperature();
+  
+  if (isnan(humidity) || isnan(temperature) )  // Check if any reads failed and exit early (to try again).
+  {
+    Serial.println(F("Failed to read from DHT sensor!"));
+    delay(100);
+    dht11_get_data();
+  }
+  else
+  {
+    Serial.print(F("Humidity: "));
+    Serial.print(humidity);
+    Serial.print(F("%  Temperature: "));
+    Serial.print(temperature);
+    Serial.println(F("°C "));
+  }
+
+}
 
 void loop() {
 
@@ -59,28 +81,9 @@ void loop() {
     http.begin(client, url);
     http.addHeader("Content-Type", "application/json");
 
-    // JSON data to send
-    // String payload = "{\"temperature\":25}";
-    // String payload = "{\"temperature\":25, \"humidity\":60, \"pressure\":1013}";
-
-    humidity = dht.readHumidity();
-    temperature = dht.readTemperature();
-
-    if (isnan(humidity) || isnan(temperature) )  // Check if any reads failed and exit early (to try again).
-    {
-      Serial.println(F("Failed to read from DHT sensor!"));
-      temperature = 0;
-      humidity = 0;
-    }
-
-    Serial.print(F("Humidity: "));
-    Serial.print(humidity);
-    Serial.print(F("%  Temperature: "));
-    Serial.print(temperature);
-    Serial.println(F("°C "));
+    dht11_get_data();
 
     String payload = "{\"temperature\":" + String(temperature) + ", \"humidity\":" + String(humidity) + "}";
-
 
     // Send POST request
     int httpResponseCode = http.POST(payload);
